@@ -12,8 +12,15 @@ You can clone/download the project here:https://github.com/upadhyayprakash/Label
 		Git Repo link: https://github.com/upadhyayprakash/LabelMeAnnotationTool.git
       
       Create a docker image of git repo by following the configuration in "Dockerfile" file.
-      
-2.	Start a LabelMe containerized service by volume sharing "Project" folder in host. That should share the entire project structure in the container.
+
+2.	Create an image build for the cloned project. From project directory where you have the "Dockerfile" file, execute,
+	
+		"sudo docker build --rm --pull -t <image_name>:<tag_name> -f Dockerfile ."
+		
+		"sudo docker build --rm --pull -t labelme:v1 -f Dockerfile ."
+		
+		
+3.	Start a LabelMe containerized service by volume sharing "Project" folder in host. That should share the entire project structure in the container.
 
    	a. Create a Container Service. Execute,
       		
@@ -33,7 +40,9 @@ You can clone/download the project here:https://github.com/upadhyayprakash/Label
          	"docker exec -it <container_id> bash"
       
       	You can come-out of container using CTRL+P+Q key combination or CMD+P+Q in case of MAC.
-		
+
+4.	###IMPORTANT: Run the "sudo make" command from both host machine and container before proceeding further. This will grant write permission to your code, which is required for application run.
+
 3.	Now in the host machine, put images in the "Images/example_folder" folder.
 		Path to Store Images:
 			"/Images/example_folder" in aws host machine.
