@@ -41,7 +41,7 @@ You can clone/download the project here:https://github.com/upadhyayprakash/Label
       
       	You can come-out of container using CTRL+P+Q key combination or CMD+P+Q in case of MAC.
 
-4.	###IMPORTANT: Run the "sudo make" command from both host machine and container before proceeding further. This will grant write permission to your code, which is required for application run.
+4.	### IMPORTANT: Run the "sudo make" command from both host machine and container before proceeding further. This will grant write permission to your code, which is required for application run.
 
 3.	Now in the host machine, put images in the "Images/example_folder" folder.
 		Path to Store Images:
