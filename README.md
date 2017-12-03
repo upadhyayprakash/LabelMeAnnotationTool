@@ -1,45 +1,117 @@
-[LabelMe](http://labelme.csail.mit.edu) annotation tool source code
+LabelMe annotation tool source code
 ===========
 
-Here you will find the source code to install the LabelMe annotation
-tool on your server. LabelMe is an annotation tool writen in
-Javascript for online image labeling. The advantage with respect to
-traditional image annotation tools is that you can access the tool
-from anywhere and people can help you to annotate your images without
-having to install or copy a large dataset onto their computers.
+LabelMe is a Web Application written in JavaScript which can be used for Image annotation. The source-code can be downloaded an run on the server capable of hosting perl runtime along with specific requirements for python. An ubuntu 16.04 based installation should have these by default.
 
-### CITATION:
+# DOWNLOAD:
 
-   B. C. Russell, A. Torralba, K. P. Murphy, W. T. Freeman.
-   LabelMe: a Database and Web-based Tool for Image Annotation.
-   International Journal of Computer Vision, 77(1-3):157-173, 2008. 
-   [Project page](http://labelme.csail.mit.edu)
+You can clone/download the project here:https://github.com/upadhyayprakash/LabelMe2.git
+
+# STEPS:
+1.	Git clone code.
+		Git Repo link: https://github.com/upadhyayprakash/LabelMe2.git
+      
+      Create a docker image of git repo by following the configuration in "Dockerfile" file.
+      
+2.	Start a LabelMe containerized service by volume sharing "Data" folder in host which has 2 main folders "Images" and "Annotation" inside. That should show as /Data folder inside the container.
+
+   	a. Create a Container Service. Execute,
+      		
+         	sudo nvidia-docker run -it --name <container_name> -p 8282:80 -v /face_data/LabelMeAnnotationTool/Data/:/var/www/html/Data <docker_image_id>
+   
+      	E.g.
+         	sudo nvidia-docker run -it --name i319452_labelme -p 8282:80 -v /face_data/LabelMeAnnotationTool/Data/:/var/www/html/Data cf2e34b6a1fd
+      
+         You shall note down the Container ID of the newly created sevice.
+      
+   	b. After this execute the "docker start" command to start the newly created container service. Execute,
+         
+         	"docker start <container_id>"
+      
+   	c. Post which, enter inside the container environment. Execute,
+         
+         	"docker exec -it <container_id> bash"
+      
+      	You can come-out of container using CTRL+P+Q key combination or CMD+P+Q in case of MAC.
+		
+3.	Now in the host machine, put 2 image in the Data/Images folder in the host. One image has 1 person and another image has more than 1 persons.
+		Path to Store Images:
+			"/Data/Images/" in aws host machine.
+			
+4. 	Run the populate_dirlist.sh script from project folder
+		
+		sudo ./populate_dirlist.sh
+		
+	you can see the changes in the "/Data/DirLists/labelme.txt" file
+	
+4.	Go to LabelMe service and annotate
+	
+	Access the LabelMe web service at: http://ec2-54-255-172-202.ap-southeast-1.compute.amazonaws.com:8181/tool.html
+	You will be shown an image. Use the Bounding Box control from the left menu and Annotate individual Person from the image.
+	
+5.	Check that Annotation XML files are created in the "Data/Annotations/" folder for every image you annotated.
+
+6.	Run code to take a list of images (in this case 2) in "/Data/Images/" folder and generate multiple images depending on number of people in the images. Execute from project folder,
+		
+		sudo ./transform.py
+	
+	The outcome of the run can be seen in the "/Data/SelectedImages" folder. Also you can see the Pascal VOC format of the annotation XML files in the "/Data/Annotations/PVOC/" folder. These are used later for training and configuration purpose.
+	
+7.	Run "config_gen.sh" script from project folder to generate "example.json" file based on the images copies created in last step.
+	
+		sudo ./config_gen.sh
+		
+	Give argument as path to newly copied image folder, ie. "Data/SelectedImages/"
+	
+	This will generate the example.json file in the "/Data/SelectedImages/Config/" folder.
+
+8.	Make sure you're able to access the JS Annotator Tool at link:
+		
+		https://s3.ap-south-1.amazonaws.com/js-image-annotator/js-segment-annotator-master/index.html
+		
+	Alternatively, you can clone the git repo <link> to host the repo in AWS S3 under a bucket.
+	
+9.	Push the image copies and the example.json file from AWS host to S3 bucket.
+	For this, an appropriate settings have to be done in AWS host which will sync images and example.json to "/data/images/" folder of JS Annotator tool hosted on S3.
+	
+	Currently, the settings are enabled. So, to actually sync the data, execute these two command,
+	For Images,
+	
+		sudo aws s3 sync /face_data/LabelMeAnnotationTool/Data/SelectedImages/ s3://js-image-annotator/js-segment-annotator-master/data/images/
+		
+	For example.json Config file
+	
+		sudo aws s3 sync /face_data/LabelMeAnnotationTool/Data/SelectedImages/Config/ s3://js-image-annotator/js-segment-annotator-master/data/
+		
+	with this step, you should be able to start with image segmentation in JS Annotation tool.
+
+10.	Start Image Segmentation Service here: https://s3.ap-south-1.amazonaws.com/js-image-annotator/js-segment-annotator-master/index.html
+
+11.	Select an image to go in edit mode. Then, select label from right panel, and annotate the specific person on the image which has a bounding box around it. You should be able to select the region on the image and color the different parts based on labels.
+
+12.	Once you're done with labeling the images objects, click on "Export" button. This will save the Image Masks in S3 bucket. You can refresh the page or go to "index" link to see the saved image masks. You can edit the already annotated images as well.
+
+13. You're Done!
 
 
-### DOWNLOAD:
 
-You can download a [zip file of the source code](https://github.com/CSAILVision/LabelMeAnnotationTool/archive/master.zip) directly.  
-
-Alternatively, you can clone it from GitHub as follows:
-
-``` sh
-$ git clone https://github.com/CSAILVision/LabelMeAnnotationTool.git
-```
-
-
-### CONTENTS:
-
-* Images - This is where your images go.
-* Annotations - This is where the annotations are collected.
-* Masks - This is where the segmentation masks are collected (scribble mode).
-* Scribbles - This is where the scribbles are collected (scribble mode).
+### CONTENTS Description:
 * tool.html - Main web page for LabelMe annotation tool.
+* annotator.sh - Shell script used to create the example.json config file for JS Annotator usage.
+* populate_dirlist.sh - Shell script used to create the list of image names and their corresponding path as a 1st Step in the LabelMe tool. The list generated is used to render the images on the Web App for manual annotation.
+* transform.py - Python script to convert the generated XML Annotations file to Pascal VOC (PVOC) format. The outcome of the script run are stored in the Data/Annotations/PVOC. Additionally the script also makes copies of original images of Data/Images/ folder into the Data/SelectedImages based on the identified objects(Bounding Boxes) in an individual images.
+* Data/Images - This is where your images are stored under multiple hierarchy.
+* Data/Annotations - This is where the generated XML annotations are collected in similar hierarchy as Images.
+* Data/SelectedImages - This is where the final Images are stored by copying the original images multiple times based on count of the objects defined under the annotated XML files of individual images.
+* Data/SelectedImages/Config/example.json - JSON config file which is generated using the annotator.sh script based on the number of images under the Data/SelectedImages folder
+* Data/SelectedImages/Config/labels.txt - This is where the labels of the Annotation are stored to be used by the annotator.sh script while generating the example.json file
+* Scribbles - This is where the scribbles are collected (scribble mode).
 * annotationTools - Directory with source code.
 * annotationCache - Location of temporary files.
 * Icons - Icons used on web page.
 
 
-### QUICK START INSTRUCTIONS:
+### QUICK INSTALLATION INSTRUCTIONS:
 
 1. Put LabelMe annotation tool code on web server (see web server
    configuration requirements below).
@@ -180,8 +252,8 @@ and folders in the "Annotations" folder have write permissions. Also,
 ### CODE API
 
 The following is a brief overview of the source code.  Please see the
-[Javascript code API](https://cdn.rawgit.com/CSAILVision/LabelMeAnnotationTool/master/annotationTools/js/api/index.html)
-for more details.
+[Javascript code API](http://<hostname>:<port>/annotationTools/js/api/index.html) for more details.
+   
 
 * tool.html - This is the entry point for the annotation tool.  The main
 functionality is to insert all of the javascript code and lay down the
@@ -189,7 +261,7 @@ drawing canvases.
 
 * annotationTools/js/ - This folder contains all of the javascript
 code for the annotation tool functionalities.
-We provide the [code API](https://cdn.rawgit.com/CSAILVision/LabelMeAnnotationTool/master/annotationTools/js/api/index.html)
+We provide the [code API](http://<hostname>:<port>/annotationTools/js/api/index.html)
 for the Javascript source code, which has been automatically extracted
 from the source code comments.
 
@@ -201,8 +273,3 @@ definitions.
 
 * annotationTools/html/ - This folder contains auxillary HTML files
 (e.g. for Mechanical Turk instructions, etc.).
-
-
----- 
-
-(c) 2015, MIT Computer Science and Artificial Intelligence Laboratory
