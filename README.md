@@ -13,14 +13,14 @@ You can clone/download the project here:https://github.com/upadhyayprakash/Label
       
       Create a docker image of git repo by following the configuration in "Dockerfile" file.
       
-2.	Start a LabelMe containerized service by volume sharing "Data" folder in host which has 2 main folders "Images" and "Annotation" inside. That should show as /Data folder inside the container.
+2.	Start a LabelMe containerized service by volume sharing "Project" folder in host. That should share the entire project structure in the container.
 
    	a. Create a Container Service. Execute,
       		
-         	sudo nvidia-docker run -it --name <container_name> -p 8282:80 -v /face_data/LabelMeAnnotationTool/Data/:/var/www/html/Data <docker_image_id>
+         	sudo docker run -it -d --name <container_name> -p 8282:80 -v /path/to/LabelMeAnnotationTool/:/var/www/html/ <docker_image_id>
    
       	E.g.
-         	sudo nvidia-docker run -it --name i319452_labelme -p 8282:80 -v /face_data/LabelMeAnnotationTool/Data/:/var/www/html/Data cf2e34b6a1fd
+         	sudo docker run -it -d --name i319452_labelme -p 8282:80 -v /data/LabelMeAnnotationTool/Data/:/var/www/html/ labelme_v1
       
          You shall note down the Container ID of the newly created sevice.
       
@@ -34,36 +34,38 @@ You can clone/download the project here:https://github.com/upadhyayprakash/Label
       
       	You can come-out of container using CTRL+P+Q key combination or CMD+P+Q in case of MAC.
 		
-3.	Now in the host machine, put 2 image in the Data/Images folder in the host. One image has 1 person and another image has more than 1 persons.
+3.	Now in the host machine, put images in the "Images/example_folder" folder.
 		Path to Store Images:
-			"/Data/Images/" in aws host machine.
+			"/Images/example_folder" in aws host machine.
 			
-4. 	Run the populate_dirlist.sh script from project folder
+	This should automatically sync the Images in the container. You can go inside container and verify it.
+			
+4. 	Run the populate_dirlist.sh script from "/annotationTools/sh/" folder
 		
-		sudo ./populate_dirlist.sh
+		sudo ./annotationTools/sh/populate_dirlist.sh
 		
-	you can see the changes in the "/Data/DirLists/labelme.txt" file
+	you can see the changes in the "/annotationCache/DirLists/labelme.txt" file
 	
 4.	Go to LabelMe service and annotate
 	
-	Access the LabelMe web service at: http://ec2-54-255-172-202.ap-southeast-1.compute.amazonaws.com:8181/tool.html
+	Access the LabelMe web service at: http://ec2-54-255-172-202.ap-southeast-1.compute.amazonaws.com:8282/tool.html
 	You will be shown an image. Use the Bounding Box control from the left menu and Annotate individual Person from the image.
 	
-5.	Check that Annotation XML files are created in the "Data/Annotations/" folder for every image you annotated.
+5.	Check that Annotation XML files are created in the "/Annotations/example_folder" folder for every image you annotated.
 
-6.	Run code to take a list of images (in this case 2) in "/Data/Images/" folder and generate multiple images depending on number of people in the images. Execute from project folder,
+6.	Run code to take a list of images (in this case 2) in "/Images/example_folder" folder and generate multiple images depending on number of people in the images. Execute from project folder,
 		
 		sudo ./transform.py
 	
-	The outcome of the run can be seen in the "/Data/SelectedImages" folder. Also you can see the Pascal VOC format of the annotation XML files in the "/Data/Annotations/PVOC/" folder. These are used later for training and configuration purpose.
+	The outcome of the run can be seen in the "/SelectedImages" folder. Also you can see the Pascal VOC format of the annotation XML files in the "/Annotations/PVOC/" folder. These are used later for training and configuration purpose.
 	
 7.	Run "config_gen.sh" script from project folder to generate "example.json" file based on the images copies created in last step.
 	
 		sudo ./config_gen.sh
 		
-	Give argument as path to newly copied image folder, ie. "Data/SelectedImages/"
+	Give argument as path to newly copied image folder, ie. "SelectedImages"
 	
-	This will generate the example.json file in the "/Data/SelectedImages/Config/" folder.
+	This will generate the example.json file in the "/SelectedImages/Config/" folder.
 
 8.	Make sure you're able to access the JS Annotator Tool at link:
 		
@@ -77,11 +79,11 @@ You can clone/download the project here:https://github.com/upadhyayprakash/Label
 	Currently, the settings are enabled. So, to actually sync the data, execute these two command,
 	For Images,
 	
-		sudo aws s3 sync /face_data/LabelMeAnnotationTool/Data/SelectedImages/ s3://js-image-annotator/js-segment-annotator-master/data/images/
+		sudo aws s3 sync /data/LabelMeAnnotationTool/SelectedImages/ s3://js-image-annotator/js-segment-annotator-master/data/images/
 		
 	For example.json Config file
 	
-		sudo aws s3 sync /face_data/LabelMeAnnotationTool/Data/SelectedImages/Config/ s3://js-image-annotator/js-segment-annotator-master/data/
+		sudo aws s3 sync /data/LabelMeAnnotationTool/SelectedImages/Config/ s3://js-image-annotator/js-segment-annotator-master/data/
 		
 	with this step, you should be able to start with image segmentation in JS Annotation tool.
 
