@@ -5,11 +5,11 @@ LabelMe is a Web Application written in JavaScript which can be used for Image a
 
 # DOWNLOAD:
 
-You can clone/download the project here:https://github.com/upadhyayprakash/LabelMe2.git
+You can clone/download the project here:https://github.com/upadhyayprakash/LabelMeAnnotationTool.git
 
 # STEPS:
 1.	Git clone code.
-		Git Repo link: https://github.com/upadhyayprakash/LabelMe2.git
+		Git Repo link: https://github.com/upadhyayprakash/LabelMeAnnotationTool.git
       
       Create a docker image of git repo by following the configuration in "Dockerfile" file.
       
