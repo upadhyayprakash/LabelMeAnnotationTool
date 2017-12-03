@@ -1,0 +1,40 @@
+{
+  "labels": [
+    "Selective Undo",
+    "Background",
+    "Face-male",
+    "Face-female",
+    "Skin",
+    "Hair",
+    "Upper-Cloth",
+    "Lower-Cloth",
+    "Full-Cloth",
+    "Swim-Under-wear",
+    "Footwear",
+    "Headwear",
+    "Neckwear",
+    "Acccessory"
+  ],
+  "imageURLs": [
+    "data/images/1924_0_1591_748_4120_3849.jpg",
+    "data/images/1924_1_1857_863_3166_2353.jpg",
+    "data/images/2123_0_2786_36_3219_1875.jpg",
+    "data/images/2123_1_3072_45_2844_183.jpg",
+    "data/images/2123_2_2844_1630_3148_1786.jpg",
+    "data/images/5912_0_1341_1066_1999_1743.jpg",
+    "data/images/6934_0_1366_795_2281_2000.jpg",
+    "data/images/6934_1_2266_649_3189_2146.jpg",
+    "data/images/8832_0_2024_1460_3348_2660.jpg"
+  ],
+  "annotationURLs": [
+    "data/annotations/1924_0_1591_748_4120_3849.png",
+    "data/annotations/1924_1_1857_863_3166_2353.png",
+    "data/annotations/2123_0_2786_36_3219_1875.png",
+    "data/annotations/2123_1_3072_45_2844_183.png",
+    "data/annotations/2123_2_2844_1630_3148_1786.png",
+    "data/annotations/5912_0_1341_1066_1999_1743.png",
+    "data/annotations/6934_0_1366_795_2281_2000.png",
+    "data/annotations/6934_1_2266_649_3189_2146.png",
+    "data/annotations/8832_0_2024_1460_3348_2660.png"
+  ]
+}
