@@ -15,12 +15,24 @@ img_list = []
 #    img_list.extend(eachLine.split())
 #fh1.close()
 
-noOfFiles = len(os.walk("/data/LabelMeAnnotationTool/Annotations/example_folder").next()[2])
+
+dir = os.path.dirname(os.path.abspath(__file__))
+#os.path.dirname(os.path.abspath(__file__))
+print("Path of script:"+dir)
+#noOfFiles = len(os.walk(os.path.join(dir, "/Annotations/example_folder")).next()[2])
+
+
+noOfFiles = len(os.walk(os.path.join(dir, "Annotations/example_folder")).next()[2])
+
+print('{}{}'.format('Number of files: ',noOfFiles))
 
 fileIndex = 0
 
 # I319452: read only annotated file names for copy and traversing.
-for file in os.listdir("/data/LabelMeAnnotationTool/Annotations/example_folder"):
+#for file in os.listdir("/data/LabelMeAnnotationTool/Annotations/example_folder"):
+pathreal = os.path.join(dir, 'Annotations/example_folder')
+print("PathReal Value: "+pathreal)
+for file in os.listdir(pathreal):
     if fileIndex == noOfFiles:
         break
     fileIndex += 1
@@ -38,8 +50,8 @@ while(k<len(img_list)):
     imname = img_list[k]
     imagename=imname
     imname = imname[:-4]
-    annotatedfilepath='/data/LabelMeAnnotationTool/PVOC/'+imname+'.xml'
-        
+    annotatedfilepath=os.path.join(dir, 'PVOC/'+imname+'.xml')
+    print('PVOC Path formed...')       
     xml2 = open(annotatedfilepath,'w')
     print(xml2)
 
@@ -93,8 +105,8 @@ while(k<len(img_list)):
              image_name = image_name + '.jpg'
             #directory to save the images 
 
-             imagesavedir= '/data/LabelMeAnnotationTool/Images/example_folder'
-             imagecopydir = '/data/LabelMeAnnotationTool/SelectedImages'
+             imagesavedir= os.path.join(dir, 'Images/example_folder')
+             imagecopydir = os.path.join('SelectedImages')
 
              
              #the name for which the copy needs to be made
@@ -112,15 +124,14 @@ while(k<len(img_list)):
                      for xmin,xmax,ymin,ymax in zip(bndboxobj.iter('xmin'),bndboxobj.iter('xmax'),bndboxobj.iter('ymin'),bndboxobj.iter('ymax')):
                          shutil.copyfile(image,imagecopydir+'/'+ image_name_text+'_'+str(idx)+'_'+xmin.text+'_'+ymin.text+'_'+xmax.text+'_'+ymax.text+'.jpg')
     def gen_xml():
-	import pdb
-	pdb.set_trace()
+
         xml2 = et.Element('annotation')
         xml_name = et.Element('filename')
         xml_folder = et.Element('folder')
                                         # Load an XML file into the tree and get the root element.
 
         import xml.etree.ElementTree
-        xml = xml.etree.ElementTree.ElementTree(file='/data/LabelMeAnnotationTool/Annotations/example_folder/'+imname+'.xml')
+        xml = xml.etree.ElementTree.ElementTree(file=os.path.join(dir, 'Annotations/example_folder/'+imname+'.xml'))
 
         root = xml.getroot()
         filename = root.findtext('filename')
@@ -165,4 +176,3 @@ while(k<len(img_list)):
     xml2.close()
     gen_coordinate_images_copy(annotatedfilepath,imname)
     k = k + 1
-
