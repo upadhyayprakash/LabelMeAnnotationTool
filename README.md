@@ -88,11 +88,11 @@ You can clone/download the project here:https://github.com/upadhyayprakash/Label
 	Currently, the settings are enabled. So, to actually sync the data, execute these two command,
 	For Images,
 	
-		sudo aws s3 sync /data/LabelMeAnnotationTool/SelectedImages/ s3://js-image-annotator/js-segment-annotator-master/data/images/
+		sudo aws s3 sync /data/LabelMeAnnotationTool/SelectedImages/ s3://js-image-annotator/js-segment-annotator-master/data/images/ --acl public-read
 		
 	For example.json Config file
 	
-		sudo aws s3 sync /data/LabelMeAnnotationTool/SelectedImages/Config/ s3://js-image-annotator/js-segment-annotator-master/data/
+		sudo aws s3 sync /data/LabelMeAnnotationTool/SelectedImages/Config/ s3://js-image-annotator/js-segment-annotator-master/data/ --acl public-read
 		
 	with this step, you should be able to start with image segmentation in JS Annotation tool.
 
