@@ -421,3 +421,5 @@
 02-Dec-2017 10:16:12 203.13.146.52 *done_loading_Images/example_folder/8832.jpg
 02-Dec-2017 10:16:18 203.13.146.52 *start_polygon
 02-Dec-2017 10:16:19 203.13.146.52 *What_is_this_object_query
+03-Dec-2017 04:40:39 180.151.104.197 *Browser_Information Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36
+03-Dec-2017 04:40:39 180.151.104.197 *start_loading
