@@ -1,1 +1,1 @@
-<annotation><filename>1864.jpg</filename><folder>example_folder</folder><object><name>robot</name><date>04-Dec-2017 03:11:03</date><id>0</id><occluded>no</occluded><hasparts></hasparts><ispartof>None</ispartof><bndbox><xmin>3280</xmin><xmax>3930</xmax><ymin>2096</ymin><ymax>3733</ymax></bndbox></object><object><name>bulb</name><date>04-Dec-2017 03:12:13</date><id>1</id><occluded>no</occluded><hasparts></hasparts><ispartof>None</ispartof><bndbox><xmin>3083</xmin><xmax>3994</xmax><ymin>1225</ymin><ymax>2073</ymax></bndbox></object></annotation>
+<annotation/>

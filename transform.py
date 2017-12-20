@@ -1,9 +1,11 @@
 #!/usr/bin/env python
+#coding: utf-8
 import lxml.etree as et
 import os
 import sys
 from xml.etree.ElementTree import  parse
-import shutil 
+import shutil
+from PIL import Image
 #fh1 = open('/data/LabelMeAnnotationTool/annotationCache/DirLists/labelme.txt','r')
 
 #import pdb
@@ -41,12 +43,15 @@ for file in os.listdir(pathreal):
     
 print(img_list)
 k = 0
+ignoreAnnotation = False
 while(k<len(img_list)):
 #    imname = img_list[k].split(",")
 
     #required to get the images from subfolder from example_folder thye path is given in labelme.txt
 #    subdirectorypath=imname[-2]
 #    imname = imname[-1]
+    ignoreAnnotation = False
+
     imname = img_list[k]
     imagename=imname
     imname = imname[:-4]
@@ -56,9 +61,9 @@ while(k<len(img_list)):
     print(xml2)
 
 
+#    ignoreAnnotation = True
 
-
-    def gen_xml_object(xmin, xmax, ymin, ymax, objectName, date, id, occluded, hasparts, ispartof):
+    def gen_xml_object(xmin, xmax, ymin, ymax, objectName, occluded):
 
         xml_object = et.Element('object')
         xml_xmin = et.Element('xmin')
@@ -67,29 +72,19 @@ while(k<len(img_list)):
         xml_ymax = et.Element('ymax')
         xml_bndbox = et.Element('bndbox')
         xml_objectName = et.Element('name')
-        xml_date = et.Element('date')
-        xml_id = et.Element('id')
         xml_occluded = et.Element('occluded')
-        xml_hasparts = et.Element('hasparts')
-        xml_ispartof = et.Element('ispartof')
-        xml_objectName.text = str(objectName)
-        xml_date.text = str(date)
-        xml_id.text = str(id)
+	try:
+        	xml_objectName.text = str(objectName)
+	except UnicodeEncodeError,e:
+		print 'Custom Error: ',e
+		xml_objectName.text = 'sample_obj_name'
         xml_occluded.text = str(occluded)
-        xml_hasparts.text = str(hasparts)
-        xml_ispartof.text = str(ispartof)
         xml_xmin.text = str(xmin)
         xml_xmax.text = str(xmax)
         xml_ymin.text = str(ymin)
         xml_ymax.text = str(ymax)
         xml_object.append(xml_objectName)
-        xml_object.append(xml_date)
-        xml_object.append(xml_id)
-        
         xml_object.append(xml_occluded)
-        xml_object.append(xml_hasparts)
-        xml_object.append(xml_ispartof)
-        
         xml_object.append(xml_bndbox)
         xml_bndbox.append(xml_xmin)
         xml_bndbox.append(xml_xmax)
@@ -124,12 +119,24 @@ while(k<len(img_list)):
                      for xmin,xmax,ymin,ymax in zip(bndboxobj.iter('xmin'),bndboxobj.iter('xmax'),bndboxobj.iter('ymin'),bndboxobj.iter('ymax')):
                          shutil.copyfile(image,imagecopydir+'/'+ image_name_text+'_'+str(idx)+'_'+xmin.text+'_'+ymin.text+'_'+xmax.text+'_'+ymax.text+'.jpg')
     def gen_xml():
-
+	global ignoreAnnotation
+#	ignoreAnnotation = True
         xml2 = et.Element('annotation')
         xml_name = et.Element('filename')
         xml_folder = et.Element('folder')
-                                        # Load an XML file into the tree and get the root element.
+        xml_size = et.Element('size')
+        xml_width = et.Element('width')
+        xml_height = et.Element('height')
+        full_path = os.path.join(dir, 'Images/example_folder/'+imname+'.jpg')
+        with Image.open(full_path) as img:
+           width, height = img.size
+        xml_width.text = str(width)
+        xml_height.text = str(height)
 
+
+
+                                        # Load an XML file into the tree and get the root element.
+       
         import xml.etree.ElementTree
         xml = xml.etree.ElementTree.ElementTree(file=os.path.join(dir, 'Annotations/example_folder/'+imname+'.xml'))
 
@@ -140,20 +147,25 @@ while(k<len(img_list)):
         folder = root.findtext('folder')
         xml_folder.text = str(folder)
         xml2.append(xml_folder)
+        xml2.append(xml_size)
+        xml_size.append(xml_width)
+        xml_size.append(xml_height)
 
         objects = root.findall('object')
+        objList = []
         for object in objects:
 
             objectName = object.findtext('name')
-            date = object.findtext('date')
-            id = object.findtext('id')
+	    if objectName.lower() == 'skip':
+		ignoreAnnotation = True
+		xml2 = et.Element('annotation')
+		return xml2
             occluded = object.findtext('occluded')
+            objectId = object.findtext('id')
             parts1 = object.findall('parts')
             hasparts = None
             ispartof = None
-            for parts in parts1:                                                                                                                                                                                        hasparts = parts.findtext('hasparts')
-               # ispartof = parts.findtext('ispartof')
-
+            for parts in parts1:                                                                                                                                   objectIsPart = parts.findtext('ispartof')  
             polygons = object.findall('polygon')
             for polygon in polygons:
 
@@ -164,15 +176,34 @@ while(k<len(img_list)):
                 for pt in pts:
                     xList.append(pt.findtext('x'))
                     yList.append(pt.findtext('y'))
-                object1['xmin'] = xList[-1]
-                object1['xmax'] = xList[1]
-                object1['ymin'] = yList[1]
-                object1['ymax'] = yList[-1]
-                xml2.append(gen_xml_object(object1['xmin'], object1['xmax'], object1['ymin'], object1['ymax'], objectName, date, id, occluded, hasparts, ispartof))
+                try:
+			object1['xmin'] = xList[-1]
+                	object1['xmax'] = xList[1]
+                	object1['ymin'] = yList[1]
+                	object1['ymax'] = yList[-1]
+		except IndexError, e:
+			print 'Custom Error: ',e
+			continue
+                object1['name'] = objectName
+                object1['id'] = objectId
+                objList.append(object1)
+                for item in objList:
+                    if item['id'] == objectIsPart:
+                       objectName = item['name']+'/'+ objectName
+                xml2.append(gen_xml_object(object1['xmin'], object1['xmax'], object1['ymin'], object1['ymax'], objectName, occluded))
         return xml2
 
-    print(str(et.tostring(gen_xml())))    
-    xml2.write(str(et.tostring(gen_xml())))
+    xmlGenRes = str(et.tostring(gen_xml()))
+    print(xmlGenRes)
+    xml2.write(xmlGenRes)
     xml2.close()
-    gen_coordinate_images_copy(annotatedfilepath,imname)
+    print 'Flag: ',ignoreAnnotation
+#    print(str(et.tostring(gen_xml())))    
+#    xml2.write(str(et.tostring(gen_xml())))
+#    xml2.close()
+    if ignoreAnnotation == True:
+	print 'Image \'Copy\' for ',imname,' is skipped..'
+    else:
+        gen_coordinate_images_copy(annotatedfilepath,imname)
+
     k = k + 1

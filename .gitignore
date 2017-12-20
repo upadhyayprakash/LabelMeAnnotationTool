@@ -9,3 +9,11 @@ annotationTools/scribble/mask.png
 annotationTools/scribble/scribble.png
 Images/example_folder/*
 !Images/example_folder/.gitkeep
+Annotations/example_folder/*
+!Annotations/example_folder/.gitkeep
+PVOC/*
+PVOC/.gitkeep
+SelectedImages/*
+SelectedImages/.gitkeep
+annotationCache/TmpAnnotations/*
+annotationCache/TmpAnnotations/.gitkeep

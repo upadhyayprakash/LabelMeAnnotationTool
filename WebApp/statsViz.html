@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>LabelMe: Stats Visualizer</title>
+		<link rel="stylesheet" href="styles/bootstrap.min.css">
+		<script src="scripts/jquery.min.js"></script>
+		<script src="scripts/bootstrap.min.js"></script>
+		<script src="scripts/canvasjs.min.js"></script>
+
+		<style>
+			body
+			{
+				margin:0 auto;
+				padding: 10px;
+				
+			}
+			.classification-stats
+			{
+				width:40%;
+			}
+			
+			.btn-primary
+			{
+				font-family:inherit;
+				font-weight:600;
+				font-size:18px;				
+			}
+			
+			#chartContainerPie
+			{
+				margin-left: 55%;
+				margin-top: -10%;
+				position:absolute;
+			}
+			
+			#chartContainerCol
+			{
+				margin-left: 55%;
+				margin-top:20%;
+				position:absolute;
+			}
+			#labelCountTable
+			{
+				position:relative;
+			}
+		</style>
+	</head>
+	<body>
+		<h2>LabelMe Annotation Statistics</h2>
+		<button type="submit" id="loadNewData" class="btn btn-primary">Refresh Status</button>
+		<h3>Class Count</h3>
+		<div id="chartContainerPie"></div>
+		<div id="chartContainerCol"></div>
+		<table id="labelCountTable" class="table table-hover table-bordered classification-stats">
+			<thead>
+			  <tr>
+				<th>#</th>
+				<th>CLASS LABEL</th>
+				<th>COUNT</th>				
+			  </tr>
+			</thead>
+			<tbody>
+			  
+			</tbody>
+		</table>
+		
+	  
+	  
+	</body>
+	
+	<script>
+		function loadNewData()
+		{
+			$.ajax({
+					url: "http://ec2-54-93-125-170.eu-central-1.compute.amazonaws.com:8282/statsJSON.json",
+					success: function(result)
+					{
+						alert(result);
+					},
+					error: function(err)
+					{
+						//alert('Error: '+err.responseText);
+						var resJSON = err.responseText;
+						resJSON = JSON.parse(resJSON.replace(/\'/g, "\""));
+						console.log(resJSON);
+						//alert('New Data: '+resJSON);
+						i=1;
+						$('#labelCountTable tbody').empty();
+						for(var key in resJSON.labelClassCount)
+						{
+							var oneRow = '<tr><td>'+(i)+'</td><td>'+key+'</td><td>'+resJSON.labelClassCount[key]+'</td></tr>';
+							$('#labelCountTable tbody').append(oneRow);
+							i++;
+						}
+						
+						loadChart(resJSON.miscStats);
+					}
+				});
+		}
+		
+		function loadChart(dataRecords)
+		{
+			var chart = new CanvasJS.Chart("chartContainerPie", {
+			theme: "light1", // "light2", "dark1", "dark2"
+			animationEnabled: false, // change to true		
+			title:{
+				text: "Annotation Completion Status"
+			},
+			data: [
+				{
+					// Change type to "bar", "area", "spline", "pie",etc.
+					type: "pie",
+					dataPoints: [
+						{ label: "Total No. of Images",  y: dataRecords.NumOfTotalImages},
+						{ label: "No. of Annotated Images", y: dataRecords.NumOfAnnotationsDone}
+					]
+				}
+			]
+			});
+			chart.render();
+			var chartCol = new CanvasJS.Chart("chartContainerCol", {
+			theme: "light1", // "light2", "dark1", "dark2"
+			animationEnabled: false, // change to true		
+			title:{
+				text: "Skipped, Persons VS Overall Annotated Images"
+			},
+			data: [
+				{
+					// Change type to "bar", "area", "spline", "pie",etc.
+					type: "column",
+					dataPoints: [
+						{ label: "Total Annotations",  y: dataRecords.NumOfAnnotationsDone},
+						{ label: "Skipped Images", y: dataRecords.NumOfSkippedImages},
+						{ label: "No. of Person Annotated", y: dataRecords.NumOfPersons}
+					]
+				}
+			]
+			});
+			chartCol.render();
+		}
+		
+		loadNewData();
+		$(document).ready(function(){
+			console.log('document loaded...');
+			$('#loadNewData').click();
+			$('#loadNewData').on('click',function(){
+				loadNewData();
+			});
+			
+		});
+	</script>
+</html>
+
